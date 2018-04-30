@@ -51,16 +51,16 @@ namespace B18_Ex2
                     goodPlayerDecision = true;
                 }
             }
+            string SecondPlayerName = "Computer";
             if (numberOfPlayers == 1)
             //if the player is playing against the computer
             {
-                Game checkersAgainstComputer = new Game(firstPlayerName, sizeOfBoard, numberOfPlayers);
+                Game checkers = new Game(firstPlayerName, SecondPlayerName, sizeOfBoard, numberOfPlayers);
             }
             else
             //if number of players is two participants
             {
                 goodName = false;
-                string SecondPlayerName = "default";
                 while (goodName == false)
                 {
                     Console.WriteLine("Hey, please enter second participant name. No spaces and no max 20 characters please :)");
@@ -70,9 +70,11 @@ namespace B18_Ex2
                         goodName = true;
                     }
                 }
-                Game twoPlayersCheckers = new Game(firstPlayerName, SecondPlayerName, sizeOfBoard, numberOfPlayers);
 
+                Game checkers = new Game(firstPlayerName, SecondPlayerName, sizeOfBoard, numberOfPlayers);
             }
+
+            //continuefkjsfnwlnkwnf
         }
 
 
