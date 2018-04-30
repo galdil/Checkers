@@ -1,0 +1,9 @@
+C:\Users\Gal\source\repos\B18 Ex02 Gal 203836598 Afik 302190947\B18_Ex2\obj\Debug\B18_Ex2.csprojResolveAssemblyReference.cache
+C:\Users\Gal\source\repos\B18 Ex02 Gal 203836598 Afik 302190947\B18_Ex2\obj\Debug\B18_Ex2.csproj.CoreCompileInputs.cache
+C:\Users\Gal\source\repos\B18 Ex02 Gal 203836598 Afik 302190947\B18_Ex2\bin\Debug\B18_Ex2.exe.config
+C:\Users\Gal\source\repos\B18 Ex02 Gal 203836598 Afik 302190947\B18_Ex2\bin\Debug\B18_Ex2.exe
+C:\Users\Gal\source\repos\B18 Ex02 Gal 203836598 Afik 302190947\B18_Ex2\bin\Debug\B18_Ex2.pdb
+C:\Users\Gal\source\repos\B18 Ex02 Gal 203836598 Afik 302190947\B18_Ex2\bin\Debug\Ex02.ConsoleUtils.dll
+C:\Users\Gal\source\repos\B18 Ex02 Gal 203836598 Afik 302190947\B18_Ex2\obj\Debug\B18_Ex2.csproj.CopyComplete
+C:\Users\Gal\source\repos\B18 Ex02 Gal 203836598 Afik 302190947\B18_Ex2\obj\Debug\B18_Ex2.exe
+C:\Users\Gal\source\repos\B18 Ex02 Gal 203836598 Afik 302190947\B18_Ex2\obj\Debug\B18_Ex2.pdb
