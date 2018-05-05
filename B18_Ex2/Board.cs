@@ -6,85 +6,148 @@ using System.Threading.Tasks;
 
 namespace B18_Ex2
 {
-    public class Board
+    internal class Board
     {
-        public static void Main()
-        {
-            Board a = new Board(6);
-            a.PrintBoard(a.m_Board, 6, "Gal");
-            Console.ReadLine();
-        }
-        private Char[,] m_Board;
-        private int m_Size = 0;
+        private Tool[,] m_Board;
+        private int m_SizeOfBoard;
         internal Board(int i_Size)
         {
-            m_Size = i_Size;
-            m_Board = new Char[i_Size, i_Size];
-            InitSquares(m_Board, m_Size);
+            m_SizeOfBoard = i_Size;
+            m_Board = new Tool[i_Size, i_Size];
+            initSquares(m_Board, m_SizeOfBoard);
         }
 
-        public static void InitSquares(Char[,] arr, int size)
+        public Tool[,] BoardAcceser
         {
-            for (int i = 0; i < (size / 2) - 1; i++)
+            get { return m_Board; }
+            set { m_Board = value; }
+        }
+
+        public int BoardSize
+        {
+            get { return m_SizeOfBoard; }
+            set { m_SizeOfBoard = value; }
+        }
+        //insert the players tools to the board
+        internal void initSquares(Tool[,] io_BoardToInit, int io_SizeOfBoard)
+        {
+            Game.FirstPlayer.Tools.Clear();
+            Game.SecondPlayer.Tools.Clear();
+            Tool toolOfTheFirstPlayer;
+            Tool toolOfTheSecondPlayer;
+            for (int i = 0; i < (io_SizeOfBoard / 2) - 1; i++)
             {
-                for (int j = 0; j < size; j++)
+                for (int j = 0; j < io_SizeOfBoard; j++)
                 {
+                    io_BoardToInit[io_SizeOfBoard / 2, j] = null;
+                    io_BoardToInit[(io_SizeOfBoard / 2) - 1, j] = null;
                     if ((i + j) % 2 == 1)
                     {
-                        arr[i, j] = 'O';
-                        arr[size - 1 - i, size - 1 - j] = 'X';
+                        //adding new tool to the first player dictionary and adding it to the board 
+                        toolOfTheFirstPlayer = new Tool(io_SizeOfBoard - 1 - i, io_SizeOfBoard - 1 - j, 'X');
+                        Game.FirstPlayer.Tools.Add(toolOfTheFirstPlayer.StringPosition, toolOfTheFirstPlayer);
+                        io_BoardToInit[io_SizeOfBoard - 1 - i, io_SizeOfBoard - 1 - j] = toolOfTheFirstPlayer;
+                        //adding new tool to the second player dictionary and adding it to the board
+                        toolOfTheSecondPlayer = new Tool(i, j, 'O');
+                        Game.SecondPlayer.Tools.Add(toolOfTheSecondPlayer.StringPosition, toolOfTheSecondPlayer);
+                        io_BoardToInit[i, j] = toolOfTheSecondPlayer;
+                    }
+
+                    else
+                    {
+                        io_BoardToInit[i, j] = null;
                     }
                 }
             }
         }
 
-        public void PrintBoard(Char[,] board, int boardSize, String currentPlayer)
+        private void PrintBoard()
         {
-            StringBuilder boardToPrint = columnsLetters(boardSize);
-            boardToPrint.Append(genarateEqualsLine(boardSize));
+            StringBuilder boardToPrint = rowOfLetters(m_SizeOfBoard);
+            boardToPrint.Append(genarateEqualsLine(m_SizeOfBoard));
             Char letter = 'a';
-            for (int j = 0; j < boardSize; j++)
-            {
-                String rowToAppend = letter++ + "|";
-                boardToPrint.Append(rowToAppend);
-                for (int i = 0; i < boardSize; i++)
-                {
-                    String currentRow = " " + board[j, i] + " |";
-                    boardToPrint.Append(currentRow);
 
+            Ex02.ConsoleUtils.Screen.Clear();
+            for (int j = 0; j < m_SizeOfBoard; j++)
+            {
+                string rowToAppend = letter++ + "|";
+                boardToPrint.Append(rowToAppend);
+                for (int i = 0; i < m_SizeOfBoard; i++)
+                {
+                    char symbol = (m_Board[j, i] == null) ? '\0' : m_Board[j, i].Symbol;
+                    string currentRow = " " + symbol + " |";
+                    boardToPrint.Append(currentRow);
                 }
 
                 boardToPrint.AppendLine();
-                boardToPrint.Append(genarateEqualsLine(boardSize));
+                boardToPrint.Append(genarateEqualsLine(m_SizeOfBoard));
             }
 
-            boardToPrint.Append(currentPlayer + "'s turn:");
             Console.WriteLine(boardToPrint.ToString());
+        }
+        //print the beginning board
+        internal void printFirstBoard()
+        {
+            PrintBoard();
+            Console.WriteLine(Game.CurrentPlayer.Name + "'s turn:\n");
+        }
+        //print the board after a move
+        internal void printGameBoard(string i_LastMove, bool anotherTurnForCurrent)
+        {
+            Player prevPlayer;
+
+            if (anotherTurnForCurrent == true)
+            {
+                prevPlayer = Game.CurrentPlayer;
+            }
+
+            else
+            {
+                prevPlayer = (Game.CurrentPlayer.Name == Game.FirstPlayer.Name) ? Game.SecondPlayer : Game.FirstPlayer;
+            }
+
+            PrintBoard();
+            Console.WriteLine(string.Format(@"{0}'s move was ({1}): {2}", prevPlayer.Name, indexToSymbol(i_LastMove), i_LastMove));
+            Console.WriteLine(string.Format(@"{0}'s turn ({1}):", Game.CurrentPlayer.Name, Game.CurrentPlayer.PlayerSymbol));
+        }
+        
+        //return the symbol in a specific square
+        private char indexToSymbol(string i_Position)
+        {
+            char fromCol = i_Position[3];
+            char fromRow = i_Position[4];
+            int indexFromCol = fromCol - 'A';
+            int indexFromRow = fromRow - 'a';
+
+            return m_Board[indexFromRow, indexFromCol].Symbol;
+
         }
 
         //creating the first line of the board
-        private StringBuilder columnsLetters(int rowSize)
+        private StringBuilder rowOfLetters(int i_RowSize)
         {
-            StringBuilder BoardColumnsLetters = new StringBuilder("   ");
+            StringBuilder rowOfLetters = new StringBuilder("   ");
             Char letter = 'A';
-            for (int i = 0; i < rowSize; i++)
+            for (int i = 0; i < i_RowSize; i++)
             {
-                BoardColumnsLetters.Append(letter++);
-                BoardColumnsLetters.Append("   ");
+                rowOfLetters.Append(letter++);
+                rowOfLetters.Append("   ");
             }
-            BoardColumnsLetters.Append("\n");
-            return BoardColumnsLetters;
+
+            rowOfLetters.Append("\n");
+            return rowOfLetters;
         }
         //genarating a line of equal sign respectively to the size
-        private String genarateEqualsLine(int rowSize)
+        private string genarateEqualsLine(int i_RowSize)
         {
-            StringBuilder equalsLine = new StringBuilder(" =");
-            String equalSign = "====";
-            for (int i = 0; i < rowSize; i++)
+            StringBuilder lineOfEquals = new StringBuilder(" =");
+            string equalSign = "====";
+            for (int i = 0; i < i_RowSize; i++)
             {
-                equalsLine.Append(equalSign);
+                lineOfEquals.Append(equalSign);
             }
-            return (equalsLine.ToString() + "\n");
+
+            return (lineOfEquals.ToString() + "\n");
         }
     }
 }

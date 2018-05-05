@@ -22,6 +22,7 @@ namespace B18_Ex2
                     goodName = true;
                 }
             }
+
             //getting and checking valid size of board
             bool goodBoardSize = false;
             string tempSize;
@@ -37,13 +38,14 @@ namespace B18_Ex2
                     goodBoardSize = true;
                 }
             }
+
             //check how many players are playing
             bool goodPlayerDecision = false;
             string tempNumOfPlayers;
             int numberOfPlayers = 1;
             while (goodPlayerDecision == false)
             {
-                Console.WriteLine("please enter 2 for two participates or 1 for a player against computer:");
+                Console.WriteLine("Please enter 1 for Player VS Computer. Otherwise enter 2 for a game with two players.");
                 tempNumOfPlayers = Console.ReadLine();
                 if (checkIfValidPlayerDecision(tempNumOfPlayers) == true)
                 {
@@ -51,14 +53,10 @@ namespace B18_Ex2
                     goodPlayerDecision = true;
                 }
             }
+
             string SecondPlayerName = "Computer";
-            if (numberOfPlayers == 1)
-            //if the player is playing against the computer
-            {
-                Game checkers = new Game(firstPlayerName, SecondPlayerName, sizeOfBoard, numberOfPlayers);
-            }
-            else
-            //if number of players is two participants
+            if (numberOfPlayers == 2)
+            //if number of players is two participants - get second player name
             {
                 goodName = false;
                 while (goodName == false)
@@ -70,14 +68,84 @@ namespace B18_Ex2
                         goodName = true;
                     }
                 }
-
-                Game checkers = new Game(firstPlayerName, SecondPlayerName, sizeOfBoard, numberOfPlayers);
             }
+            //construct a new checkers game with compatible name of two players or player and computer
+            Game checkers = new Game(firstPlayerName, SecondPlayerName, sizeOfBoard, numberOfPlayers);
+            string RespondForAnotherGame = "yes";
+            bool rematch = true;
+            while (rematch == true)
+            {
+                checkers.RestartNewGame();
+                while (Game.GameEnded == false)
+                {
+                    string playerWantedMove;
+                    bool endOfMove = false;
+                    while (endOfMove == false)
+                    {
+                        Console.WriteLine("Please enter a valid move in the format of COLrow>COLrow or type Q to quit and lose the game.");
+                        playerWantedMove = Console.ReadLine();
+                        if (checkAvailableMoveFormat(playerWantedMove) == true)
+                        {
+                            if (Game.CheckAvailableMove(playerWantedMove) == true)
+                            {
+                                checkers.Move(playerWantedMove);
+                                if (Game.GameEnded == true)
+                                {
+                                    //switch(checkers.GameStatus == game.GameStatus.WIN)
+                                    {
 
-            //continuefkjsfnwlnkwnf
+                                    }
+                                    //if(checkers.GameStatus == game.GameStatus.TIE)
+                                }
+                                endOfMove = true;
+                            }
+
+                            else
+                            {
+                                Console.WriteLine("Not a valid move! Please try again");
+                            }
+                        }
+                        /*
+                        else if (playerWantedMove == "Q" && checkers.isLoserPlayer(checkers.CurrentPlayer) == true)
+                        {
+                            checkers.gameEnded = true;
+                            endOfMove = true;
+                            if (checkers.FirstPlayer == checkers.CurrentPlayer)
+                            {
+                                checkers.SecondPlayer.Score++;
+                                Console.WriteLine(checkers.FirstPlayer.Name + " you lost :(");
+                            }
+                            else
+                            {
+                                checkers.FirstPlayer.Score++;
+                                Console.WriteLine(checkers.SecondPlayer.Name + " you lost :(");
+                            }
+                        }*/
+                    }
+
+
+                }
+
+                bool ValidAnswerPlayAnotherGame = false;
+                while (ValidAnswerPlayAnotherGame == false)
+                {
+                    Console.WriteLine("Would you want to play another round? (yes/no)");
+                    RespondForAnotherGame = Console.ReadLine();
+                    if (RespondForAnotherGame == "yes")
+                    {
+                        ValidAnswerPlayAnotherGame = true;
+                    }
+                    if (RespondForAnotherGame == "no")
+                    {
+                        rematch = false;
+                        ValidAnswerPlayAnotherGame = true;
+                    }
+                }
+            }
+            Console.WriteLine("Thank You. Bye Bye :) ");
         }
 
-
+        //private methods to check validitaion of players information
 
         private bool checkIfValidName(string i_playerNameStr)
         {
@@ -138,6 +206,17 @@ namespace B18_Ex2
                 return false;
             }
         }
+
+        //check whether the format of the move is legal
+        private bool checkAvailableMoveFormat(String i_move)
+        {
+            bool validFormat = false;
+            if ((i_move.Length == 5) && (i_move[0] >= 'A' && i_move[0] <= 'Z') && (i_move[1] >= 'a' && i_move[1] <= 'z') && (i_move[2] == '>') && (i_move[3] >= 'A' && i_move[3] <= 'Z') && (i_move[4] >= 'a' && i_move[4] <= 'z'))
+            {
+                validFormat = true;
+            }
+
+            return validFormat;
+        }
     }
 }
-

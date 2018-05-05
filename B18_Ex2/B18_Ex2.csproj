@@ -36,8 +36,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Board.cs" />
+    <Compile Include="Game.cs" />
     <Compile Include="Interface.cs" />
+    <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="Tool.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Ex02.ConsoleUtils">
