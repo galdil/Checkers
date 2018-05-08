@@ -1,0 +1,10 @@
+==========================Exercise Checking Report==========================
+Exercise No...........: 2
+First Student Details.: 203836598 - Gal Dayagi
+Second Student Details: 302190947- Afik Shani
+Delivery Date.........: 06 - May - 2018
+Delivered In Delay....: No
+Delay Reason..........: 
+Visual Studio Version.: 2017
+Comments..............: We haven't had enough time to add a move class and change the game class to more readable class
+========================End Exercise Checking Report========================

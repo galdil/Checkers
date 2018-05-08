@@ -15,7 +15,7 @@ namespace B18_Ex2
         private static Player m_CurrentPlayer;
         private static int m_NumberOfPlayers;
         private static Board m_Board;
-        private static bool m_GameEnded = false;
+        private bool m_GameEnded = false;
         private static string m_LastMove;
         public GameStatus m_StatusOfTheGame;
 
@@ -32,7 +32,10 @@ namespace B18_Ex2
 
         internal void RestartNewGame()
         {
+            this.StatusOfTheGame = Game.GameStatus.NONE;
             GameEnded = false;
+            Game.Board.initSquares(Game.Board.BoardAcceser, Game.Board.BoardSize);
+            Game.Board.printFirstBoard();
             m_Board.initSquares(m_Board.BoardAcceser, m_Board.BoardSize);
             FirstPlayer.ToolsCounter = Player.initNumOfTools(m_Board.BoardSize);
             SecondPlayer.ToolsCounter = Player.initNumOfTools(m_Board.BoardSize);
@@ -49,7 +52,7 @@ namespace B18_Ex2
         {
             get { return m_CurrentPlayer; }
         }
-        public static bool GameEnded
+        public bool GameEnded
         {
             get { return m_GameEnded; }
             set { m_GameEnded = value; }
@@ -58,6 +61,12 @@ namespace B18_Ex2
         public static Board Board
         {
             get { return m_Board; }
+        }
+
+        public GameStatus StatusOfTheGame
+        {
+            get { return m_StatusOfTheGame; }
+            set { m_StatusOfTheGame = value; }
         }
 
         public static bool CheckAvailableMove(string i_Move)
@@ -76,32 +85,28 @@ namespace B18_Ex2
             {
                 validMove = false;
                 bool captureWithSameTool = (i_Move.Substring(0, 2) == m_LastMove);
-                bool ableToCapture = IsAbleToCapture(indexToCol, indexToRow, indexFromCol, indexFromRow);
+                bool ableToCapture = IsLeaglCaptureMove(indexToCol, indexToRow, indexFromCol, indexFromRow);
 
                 if(captureWithSameTool && ableToCapture)
                 {
                     validMove = true;
                 }
-
-                return validMove;
             }
 
             else if (CurrentPlayer.IsPlayerAbleToCapture())
             {
-                validMove = IsAbleToCapture(indexToCol, indexToRow, indexFromCol, indexFromRow);
+                validMove = IsLeaglCaptureMove(indexToCol, indexToRow, indexFromCol, indexFromRow);
             }
 
             else
             {
-                if (NotOutOfBoundsChecker(indexToCol, indexToRow)
-                && checkFreeSquares(indexToCol, indexToRow)
-                && checkIfThisMySquares(indexFromCol, indexFromRow)
-                && (isLegalDest(indexToCol, indexToRow, indexFromCol, indexFromRow))
-                || IsAbleToCapture(indexToCol, indexToRow, indexFromCol, indexFromRow))
+                if (IsLeaglRegularMove(indexToCol, indexToRow, indexFromCol, indexFromRow)
+                || IsLeaglCaptureMove(indexToCol, indexToRow, indexFromCol, indexFromRow))
                 {
                     validMove = true;
                 }
             }
+
             return validMove;
         }
         //checks if the dest square is not out of bounds
@@ -135,37 +140,100 @@ namespace B18_Ex2
             }
             return validMove;
         }
-        //checks if a capture move is legal
-        internal static bool IsAbleToCapture(int i_ToCol, int i_ToRow, int i_FromCol, int i_FromRow)
+
+        //checks if the destination square is in a legal place and free
+        private static bool isLegalDest(int i_ToCol, int i_ToRow, int i_FromCol, int i_FromRow, bool checkForCapture)
         {
             bool validMove = false;
             Player prevPlayer = (m_CurrentPlayer.Name == m_FirstPlayer.Name) ? m_SecondPlayer : m_FirstPlayer;
             bool isOpponentToolBetween = prevPlayer.Tools.ContainsKey(Tool.ConvertToStringPosition(((i_ToRow + i_FromRow) / 2), (i_ToCol + i_FromCol) / 2));
-
-            if ((i_ToRow - i_FromRow == m_CurrentPlayer.MovingDirection * 2) && isOpponentToolBetween
-                && checkFreeSquares(i_ToCol, i_ToRow))
+            //the tool is a regular tool
+            if (Board.BoardAcceser[i_FromRow, i_FromCol].TypeOfTool == "regular")
             {
-                if ((Math.Abs(i_FromCol - i_ToCol) == 2))
+                bool playerIsCapturingInTheRightDirection = (i_ToRow - i_FromRow == m_CurrentPlayer.MovingDirection * 2) && (Math.Abs(i_FromCol - i_ToCol) == 2);
+                bool playerIsMovingInTheRightDirection = (i_ToRow - i_FromRow == m_CurrentPlayer.MovingDirection) && (Math.Abs(i_FromCol - i_ToCol) == 1);
+                
+                //if the next move is legal
+                if ((playerIsMovingInTheRightDirection && !checkForCapture || playerIsCapturingInTheRightDirection && isOpponentToolBetween)
+                    && checkFreeSquares(i_ToCol, i_ToRow))
                 {
                     validMove = true;
                 }
             }
+            //the tool is a king
+            else
+            {
+                bool playerIsCapturingInTheRightDirection = (Math.Abs(i_ToRow - i_FromRow) == 2) && (Math.Abs(i_FromCol - i_ToCol) == 2);
+                bool playerIsMovingInTheRightDirection = (Math.Abs(i_ToRow - i_FromRow) == 1) && (Math.Abs(i_FromCol - i_ToCol) == 1);
+                //if the next move is legal
+                if (checkFreeSquares(i_ToCol, i_ToRow) && ((playerIsMovingInTheRightDirection && !checkForCapture) 
+                    || (playerIsCapturingInTheRightDirection && isOpponentToolBetween)))
+                {
+                    validMove = true;
+                }
+            }
+
             return validMove;
         }
-        //checks if the destination square is in a legal place and free
-        private static bool isLegalDest(int i_ToCol, int i_ToRow, int i_FromCol, int i_FromRow)
+
+
+        //checks if a capture move is legal
+        internal static bool IsLeaglCaptureMove(int i_ToCol, int i_ToRow, int i_FromCol, int i_FromRow)
         {
             bool validMove = false;
-            //if the next regular move is legal
-            if ((i_ToRow - i_FromRow == m_CurrentPlayer.MovingDirection) && checkFreeSquares(i_ToCol, i_ToRow))
+
+            if (NotOutOfBoundsChecker(i_ToCol, i_ToRow) 
+                && checkIfThisMySquares(i_FromCol, i_FromRow) 
+                && isLegalDest(i_ToCol, i_ToRow, i_FromCol, i_FromRow, true))
             {
-                if ((Math.Abs(i_FromCol - i_ToCol) == 1))
-                {
-                    validMove = true;
-                }
+                validMove = true;
             }
 
             return validMove;
+        }
+
+        internal static bool IsLeaglRegularMove(int i_ToCol, int i_ToRow, int i_FromCol, int i_FromRow)
+        {
+            bool validMove = false;
+
+            if (NotOutOfBoundsChecker(i_ToCol, i_ToRow) 
+                && checkIfThisMySquares(i_FromCol, i_FromRow)
+                && isLegalDest(i_ToCol, i_ToRow, i_FromCol, i_FromRow, false))
+            {
+                validMove = true;
+            }
+
+            return validMove;
+        }
+
+
+
+        //checks if there is an option to capture another tool after one has been capture.
+        private static bool checkIfNextCaptureIsLegal(int i_ToCol, int i_ToRow, int i_FromCol, int i_FromRow)
+        {
+            bool legalCapture = false;
+            int columnOfFirstOptionToCapture = i_ToCol + 2;
+            int rowOfOptionsToCapture = i_ToRow + (2 * m_CurrentPlayer.MovingDirection);
+            int columnOfSecondOptionToCapture = i_ToCol - 2;
+            int rowAvailbleForTheKing = i_ToRow + (-2 * m_CurrentPlayer.MovingDirection);
+
+            //checks if the player can capture another tool
+            if ((IsLeaglCaptureMove(columnOfFirstOptionToCapture, rowOfOptionsToCapture, i_ToCol, i_ToRow))
+                || (IsLeaglCaptureMove(columnOfSecondOptionToCapture, rowOfOptionsToCapture, i_ToCol, i_ToRow)))
+            {
+                legalCapture = true;
+            }
+            //if the tool is king he can capture backwards
+            if (Board.BoardAcceser[i_ToRow, i_ToCol].TypeOfTool == "king")
+            {
+                if ((IsLeaglCaptureMove(columnOfFirstOptionToCapture, rowAvailbleForTheKing, i_ToCol, i_ToRow))
+                || (IsLeaglCaptureMove(columnOfSecondOptionToCapture, rowAvailbleForTheKing, i_ToCol, i_ToRow)))
+                {
+                    legalCapture = true;
+                }
+            }
+
+            return legalCapture;
         }
 
 
@@ -200,7 +268,7 @@ namespace B18_Ex2
             if (aimToCapture
                 && checkIfNextCaptureIsLegal(indexToCol, indexToRow, indexFromCol, indexFromRow))
             {
-                m_LastMove = i_Move.Substring(3,2);
+                m_LastMove = i_Move.Substring(3, 2);
                 Console.WriteLine(m_LastMove);
                 CurrentPlayer.JustCaptured = true;
                 m_Board.printGameBoard(i_Move, true);
@@ -216,44 +284,62 @@ namespace B18_Ex2
                 {
                     m_CurrentPlayer = m_FirstPlayer;
                 }
-
+                CheckIfWinner();
                 CurrentPlayer.JustCaptured = false;
                 m_Board.printGameBoard(i_Move, false);
             }
         }
-
-        //checks if there is an option to capture another tool after one has been capture.
-        private static bool checkIfNextCaptureIsLegal(int i_ToCol, int i_ToRow, int i_FromCol, int i_FromRow)
+        //move random move from the list of moves
+        internal void ComputerMove()
         {
-            bool legalCapture = false;
-            int columnOfFirstOptionToCapture = i_ToCol + 2;
-            int rowOfOptionsToCapture = i_ToRow + (2 * m_CurrentPlayer.MovingDirection);
-            int columnOfSecondOptionToCapture = i_ToCol - 2;
+            List<string> listOfMoves = Player.GetListOfLegalMoves();
+            Random randomNum = new Random();
+            int num = randomNum.Next(0, listOfMoves.Count);
+            string computerMove = listOfMoves.ElementAt(num);
 
-            //checks if the player can capture another tool
-            if (NotOutOfBoundsChecker(columnOfFirstOptionToCapture, rowOfOptionsToCapture)
-                && (IsAbleToCapture(columnOfFirstOptionToCapture, rowOfOptionsToCapture, i_ToCol, i_ToRow))
-
-                || NotOutOfBoundsChecker(columnOfSecondOptionToCapture, rowOfOptionsToCapture)
-                && (IsAbleToCapture(columnOfSecondOptionToCapture, rowOfOptionsToCapture, i_ToCol, i_ToRow)))
-            {
-                legalCapture = true;
-            }
-
-            return legalCapture;
+            Move(computerMove);
         }
-        internal bool IsLoserPlayer(Player i_PlayerToCheck)
+
+
+        internal bool IsLoserPlayerWhenQuit(Player i_PlayerToCheck)
         {
             bool isLosing = false;
             if (i_PlayerToCheck == FirstPlayer)
             {
-                isLosing = (FirstPlayer.Score < SecondPlayer.Score) ? true : false;
+                isLosing = (FirstPlayer.Score <= SecondPlayer.Score) ? true : false;
             }
             if (i_PlayerToCheck == SecondPlayer)
             {
-                isLosing = (SecondPlayer.Score < FirstPlayer.Score) ? true : false;
+                isLosing = (SecondPlayer.Score <= FirstPlayer.Score) ? true : false;
             }
             return isLosing;
+        }
+
+        internal void PlayerSurrender()
+        {
+            GameEnded = true;
+            checkIfWinOrTie();
+            if (StatusOfTheGame == GameStatus.WIN)
+            {
+                string winner = WhoWins();
+                Console.WriteLine(winner + " has won !!");
+            }
+            if (StatusOfTheGame == GameStatus.TIE)
+            {
+                Console.WriteLine("It's a tie!");
+            }
+        }
+
+        private void checkIfWinOrTie()
+        {
+            if (FirstPlayer.Score == SecondPlayer.Score)
+            {
+                StatusOfTheGame = GameStatus.TIE;
+            }
+            else
+            {
+                StatusOfTheGame = GameStatus.WIN;
+            }
         }
 
         internal string WhoWins()
@@ -263,14 +349,53 @@ namespace B18_Ex2
             if (FirstPlayer.Score > SecondPlayer.Score)
             {
                 winner = FirstPlayer.Name;
-                FirstPlayer.Score += margin;
+                FirstPlayer.TournamentScore += margin;
             }
             if (SecondPlayer.Score > FirstPlayer.Score)
             {
                 winner = SecondPlayer.Name;
-                SecondPlayer.Score += margin;
+                SecondPlayer.TournamentScore += margin;
             }
             return winner;
+        }
+
+        internal void CheckIfWinner()
+        {
+            if (isLosing(CurrentPlayer) == true)
+            {
+                this.StatusOfTheGame = Game.GameStatus.WIN;
+                GameEnded = true;
+            }
+        }
+
+        private bool isLosing(Player i_PlayerToCheck)
+        {
+            bool losing = false;
+            if ((i_PlayerToCheck.Score == 0) || (i_PlayerToCheck.IsPlayerAbleToMove() == false))
+            {
+                losing = true;
+            }
+            return losing;
+        }
+
+        private void scoreUpdate(Player i_PlayerScoreToBeUpdated, int i_rowIndexOfToolToDelete, int i_colIndexOfToolToDelete)
+        {
+            switch (Board.BoardAcceser[i_rowIndexOfToolToDelete, i_colIndexOfToolToDelete].Symbol)
+            {
+                case 'X':
+                    i_PlayerScoreToBeUpdated.Score--;
+                    break;
+                case 'O':
+                    i_PlayerScoreToBeUpdated.Score--;
+                    break;
+                case 'K':
+                    i_PlayerScoreToBeUpdated.Score -= 4;
+                    break;
+                case 'U':
+                    i_PlayerScoreToBeUpdated.Score -= 4;
+                    break;
+
+            }
         }
     }
 }

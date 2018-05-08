@@ -71,61 +71,63 @@ namespace B18_Ex2
             }
             //construct a new checkers game with compatible name of two players or player and computer
             Game checkers = new Game(firstPlayerName, SecondPlayerName, sizeOfBoard, numberOfPlayers);
+            string winner;
             string RespondForAnotherGame = "yes";
             bool rematch = true;
+            bool computerTurn = false;
             while (rematch == true)
             {
                 checkers.RestartNewGame();
-                while (Game.GameEnded == false)
+                while (checkers.GameEnded == false)
                 {
                     string playerWantedMove;
                     bool endOfMove = false;
                     while (endOfMove == false)
                     {
-                        Console.WriteLine("Please enter a valid move in the format of COLrow>COLrow or type Q to quit and lose the game.");
-                        playerWantedMove = Console.ReadLine();
-                        if (checkAvailableMoveFormat(playerWantedMove) == true)
+                        //case of 2 players game or player and computer while its player's turn
+                        if ((numberOfPlayers == 2) || ((numberOfPlayers == 1) && (Game.CurrentPlayer.Name!="Computer")))
                         {
-                            if (Game.CheckAvailableMove(playerWantedMove) == true)
+                            Console.WriteLine("Please enter a valid move in the format of COLrow>COLrow or type Q to quit and lose the game.");
+                            playerWantedMove = Console.ReadLine();
+                            if (checkAvailableMoveFormat(playerWantedMove) == true)
                             {
-                                checkers.Move(playerWantedMove);
-                                if (Game.GameEnded == true)
+                                if (Game.CheckAvailableMove(playerWantedMove) == true)
                                 {
-                                    //switch(checkers.GameStatus == game.GameStatus.WIN)
+                                    checkers.Move(playerWantedMove);
+                                    endOfMove = true;
+                                    if (checkers.StatusOfTheGame == Game.GameStatus.WIN)
                                     {
-
+                                        winner = checkers.WhoWins();
+                                        Console.WriteLine(winner + " has won!!");
                                     }
-                                    //if(checkers.GameStatus == game.GameStatus.TIE)
                                 }
-                                endOfMove = true;
+
+                                else
+                                {
+                                    Console.WriteLine("Not a valid move! Please try again");
+                                }
                             }
 
-                            else
+                            else if (playerWantedMove == "Q" && checkers.IsLoserPlayerWhenQuit(Game.CurrentPlayer) == true)
                             {
-                                Console.WriteLine("Not a valid move! Please try again");
+                                endOfMove = true;
+                                checkers.PlayerSurrender();
                             }
                         }
-                        /*
-                        else if (playerWantedMove == "Q" && checkers.isLoserPlayer(checkers.CurrentPlayer) == true)
+                        //computer's play if needed
+                        if ((numberOfPlayers == 1) && (Game.CurrentPlayer.Name == "Computer") && (checkers.GameEnded == false))
                         {
-                            checkers.gameEnded = true;
-                            endOfMove = true;
-                            if (checkers.FirstPlayer == checkers.CurrentPlayer)
+                            checkers.ComputerMove();
+                            if (checkers.StatusOfTheGame == Game.GameStatus.WIN)
                             {
-                                checkers.SecondPlayer.Score++;
-                                Console.WriteLine(checkers.FirstPlayer.Name + " you lost :(");
+                                winner = checkers.WhoWins();
+                                Console.WriteLine(winner + " has won!!");
                             }
-                            else
-                            {
-                                checkers.FirstPlayer.Score++;
-                                Console.WriteLine(checkers.SecondPlayer.Name + " you lost :(");
-                            }
-                        }*/
+                        }
                     }
-
-
                 }
-
+                //game has ended
+                tournamentScorePrint();
                 bool ValidAnswerPlayAnotherGame = false;
                 while (ValidAnswerPlayAnotherGame == false)
                 {
@@ -145,11 +147,12 @@ namespace B18_Ex2
             Console.WriteLine("Thank You. Bye Bye :) ");
         }
 
+
         //private methods to check validitaion of players information
 
         private bool checkIfValidName(string i_playerNameStr)
         {
-            if ((i_playerNameStr.Length <= 20) && (i_playerNameStr.Contains(" ") == false))
+            if ((i_playerNameStr.Length <= 20) && (i_playerNameStr.Contains(" ") == false) && (i_playerNameStr.Length > 0))
             {
                 return true;
             }
@@ -217,6 +220,11 @@ namespace B18_Ex2
             }
 
             return validFormat;
+        }
+
+        private void tournamentScorePrint()
+        {
+            Console.WriteLine(string.Format(@"The tournament score is: {0} : {1}. ( {2} Vs. {3} ) ", Game.FirstPlayer.TournamentScore, Game.SecondPlayer.TournamentScore, Game.FirstPlayer.Name, Game.SecondPlayer.Name));
         }
     }
 }

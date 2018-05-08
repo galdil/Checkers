@@ -96,18 +96,30 @@ namespace B18_Ex2
             return stringToReturn.ToString();
         }
 
+        //if the player can move regular move
         internal bool IsAbleToMove()
         {
             bool isAbleToMove = false;
             int rowOfTheOptionsToMove = RowPosition + Game.CurrentPlayer.MovingDirection;
+            int rowAvailbleForTheKing = RowPosition + (-1 * Game.CurrentPlayer.MovingDirection);
             int colOfTheFirstOption = ColPosition + 1;
             int colOfTheSecondOption = ColPosition - 1;
             string firstOptionToMove = StringPosition + '>' + ConvertToStringPosition(rowOfTheOptionsToMove, colOfTheFirstOption);
             string secondOptionToMove = StringPosition + '>' + ConvertToStringPosition(rowOfTheOptionsToMove, colOfTheSecondOption);
+            string kingFirstOptionToMove = StringPosition + '>' + ConvertToStringPosition(rowAvailbleForTheKing, colOfTheFirstOption);
+            string kingSecondtOptionToMove = StringPosition + '>' + ConvertToStringPosition(rowAvailbleForTheKing, colOfTheSecondOption);
 
             if (Game.CheckAvailableMove(firstOptionToMove) || Game.CheckAvailableMove(secondOptionToMove))
             {
                 isAbleToMove = true;
+            }
+
+            if(TypeOfTool == "king")
+            {
+                if(Game.CheckAvailableMove(kingFirstOptionToMove) || Game.CheckAvailableMove(kingFirstOptionToMove))
+                {
+                    isAbleToMove = true;
+                }
             }
 
             return isAbleToMove;
@@ -117,15 +129,23 @@ namespace B18_Ex2
         {
             bool isAbleToMove = false;
             int rowOfTheOptionsToMove = RowPosition + Game.CurrentPlayer.MovingDirection * 2;
+            int rowAvailbleForTheKing = RowPosition + Game.CurrentPlayer.MovingDirection * -2;
             int colOfTheFirstOption = ColPosition + 2;
             int colOfTheSecondOption = ColPosition - 2;
 
-            if (Game.NotOutOfBoundsChecker(colOfTheFirstOption, rowOfTheOptionsToMove) 
-                && Game.IsAbleToCapture( colOfTheFirstOption, rowOfTheOptionsToMove, ColPosition, RowPosition)
-                || Game.NotOutOfBoundsChecker(colOfTheSecondOption, rowOfTheOptionsToMove)
-                && Game.IsAbleToCapture(colOfTheSecondOption, rowOfTheOptionsToMove, ColPosition, RowPosition))
+            if (Game.IsLeaglCaptureMove(colOfTheFirstOption, rowOfTheOptionsToMove, ColPosition, RowPosition)
+                || Game.IsLeaglCaptureMove(colOfTheSecondOption, rowOfTheOptionsToMove, ColPosition, RowPosition))
             {
                 isAbleToMove = true;
+            }
+
+            if (TypeOfTool == "king")
+            {
+                if (Game.IsLeaglCaptureMove(colOfTheFirstOption, rowAvailbleForTheKing, ColPosition, RowPosition)
+                   || Game.IsLeaglCaptureMove(colOfTheSecondOption, rowAvailbleForTheKing, ColPosition, RowPosition))
+                {
+                    isAbleToMove = true;
+                }
             }
 
             return isAbleToMove;
@@ -137,16 +157,17 @@ namespace B18_Ex2
             ColPosition = i_NewColPosition;
             StringPosition = i_NewStringPosition;
 
-            if (Game.CurrentPlayer.MovingDirection == -1)
+            //checks if the player reached the end of the board and replace the tool to a king
+            if (Game.CurrentPlayer.MovingDirection == 1)
             {
-                if (RowPosition == Game.Board.BoardSize - 1 && ColPosition == Game.Board.BoardSize - 1)
+                if (RowPosition == Game.Board.BoardSize - 1)
                 {
                     Symbol = Game.CurrentPlayer.KingSymbol;
                 }
             }
             else
             {
-                if (RowPosition == 0 && ColPosition == 0)
+                if (RowPosition == 0)
                 {
                     Symbol = Game.CurrentPlayer.KingSymbol;
                 }

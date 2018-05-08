@@ -16,12 +16,14 @@ namespace B18_Ex2
         private bool m_JustCaptured;
         private char m_PlayerSymbol;
         private char m_KingSymbol;
+        private int m_TournamentScore;
 
         internal Player(string i_Name, int i_BoardSize, char i_PlayerSymbol)
         {
             m_Tools = new Dictionary<string, Tool>();
             m_Name = i_Name;
             m_Score = 0;
+            m_TournamentScore = 0;
             m_JustCaptured = false;
             m_NumOfTools = initNumOfTools(i_BoardSize);
             m_PlayerSymbol = i_PlayerSymbol;
@@ -104,6 +106,12 @@ namespace B18_Ex2
             set { m_Score = value; }
         }
 
+        public int TournamentScore
+        {
+            get { return m_TournamentScore; }
+            set { m_TournamentScore = value; }
+        }
+
         public int ToolsCounter
         {
             get { return m_NumOfTools; }
@@ -121,6 +129,7 @@ namespace B18_Ex2
                     ableToMove = true;
                 }
             }
+            Console.WriteLine(ableToMove);
             return ableToMove;
         }
 
@@ -136,6 +145,96 @@ namespace B18_Ex2
                 }
             }
             return ableToMove;
+        }
+        //genarates a list of optional moves for the computer
+        internal static List<string> GetListOfLegalMoves()
+        {
+            List<string> listOfLegalMoves = new List<string>();
+            int rowOfTheOptionsToMoveForCapture;
+            int rowAvailbleForTheKingForCapture;
+            int colOfTheFirstOptionForCapture;
+            int colOfTheSecondOptionForCapture;
+
+            int rowOfTheOptionsToMove;
+            int rowAvailbleForTheKing;
+            int colOfTheFirstOption;
+            int colOfTheSecondOption;
+
+            //if player can capture it can only move to capture
+            foreach (var item in Game.SecondPlayer.Tools)
+            {
+                if (Game.SecondPlayer.IsPlayerAbleToCapture())
+                {
+                    rowOfTheOptionsToMoveForCapture = item.Value.RowPosition + Game.CurrentPlayer.MovingDirection * 2;
+                    rowAvailbleForTheKingForCapture = item.Value.RowPosition + Game.CurrentPlayer.MovingDirection * -2;
+                    colOfTheFirstOptionForCapture = item.Value.ColPosition + 2;
+                    colOfTheSecondOptionForCapture = item.Value.ColPosition - 2;
+                    string firstOptionToMoveForCapture = item.Key + '>' + Tool.ConvertToStringPosition(rowOfTheOptionsToMoveForCapture, colOfTheFirstOptionForCapture);
+                    string secondOptionToMoveForCapture = item.Key + '>' + Tool.ConvertToStringPosition(rowOfTheOptionsToMoveForCapture, colOfTheSecondOptionForCapture);
+                    string kingFirstOptionToMoveForCapture = item.Key + '>' + Tool.ConvertToStringPosition(rowAvailbleForTheKingForCapture, colOfTheFirstOptionForCapture);
+                    string kingSecondOptionToMoveForCapture = item.Key + '>' + Tool.ConvertToStringPosition(rowAvailbleForTheKingForCapture, colOfTheSecondOptionForCapture);
+                    //adding the moves to the list
+                    if (Game.CheckAvailableMove(firstOptionToMoveForCapture))
+                    {
+                        listOfLegalMoves.Add(item.Key + '>' + Tool.ConvertToStringPosition(rowOfTheOptionsToMoveForCapture, colOfTheFirstOptionForCapture));
+                    }
+
+                    if (Game.CheckAvailableMove(secondOptionToMoveForCapture))
+                    {
+                        listOfLegalMoves.Add(item.Key + '>' + Tool.ConvertToStringPosition(rowOfTheOptionsToMoveForCapture, colOfTheSecondOptionForCapture));
+                    }
+
+                    if (item.Value.TypeOfTool == "king")
+                    {
+                        if (Game.CheckAvailableMove(kingFirstOptionToMoveForCapture))
+                            {
+                            listOfLegalMoves.Add(item.Key + '>' + Tool.ConvertToStringPosition(rowAvailbleForTheKingForCapture, colOfTheFirstOptionForCapture));
+                        }
+
+                        if (Game.CheckAvailableMove(kingSecondOptionToMoveForCapture))
+                        {
+                            listOfLegalMoves.Add(item.Key + '>' + Tool.ConvertToStringPosition(rowAvailbleForTheKingForCapture, colOfTheSecondOptionForCapture));
+                        }
+                    }
+                }
+
+                else
+                {
+                    rowOfTheOptionsToMove = item.Value.RowPosition + Game.CurrentPlayer.MovingDirection; ;
+                    rowAvailbleForTheKing = item.Value.RowPosition + (-1 * Game.CurrentPlayer.MovingDirection);
+                    colOfTheFirstOption = item.Value.ColPosition + 1;
+                    colOfTheSecondOption = item.Value.ColPosition - 1;
+                    string firstOptionToMove = item.Key + '>' + Tool.ConvertToStringPosition(rowOfTheOptionsToMove, colOfTheFirstOption);
+                    string secondOptionToMove = item.Key + '>' + Tool.ConvertToStringPosition(rowOfTheOptionsToMove, colOfTheSecondOption);
+                    string kingFirstOptionToMove = item.Key + '>' + Tool.ConvertToStringPosition(rowAvailbleForTheKing, colOfTheFirstOption);
+                    string kingSecondOptionToMove = item.Key + '>' + Tool.ConvertToStringPosition(rowAvailbleForTheKing, colOfTheSecondOption);
+
+                    if (Game.CheckAvailableMove(firstOptionToMove))
+                    {
+                        listOfLegalMoves.Add(firstOptionToMove);
+                    }
+
+                    if (Game.CheckAvailableMove(secondOptionToMove))
+                    {
+                        listOfLegalMoves.Add(secondOptionToMove);
+                    }
+
+                    if (item.Value.TypeOfTool == "king")
+                    {
+                        if (Game.CheckAvailableMove(kingFirstOptionToMove))
+                        {
+                            listOfLegalMoves.Add(kingFirstOptionToMove);
+                        }
+
+                        if (Game.CheckAvailableMove(kingSecondOptionToMove))
+                        {
+                            listOfLegalMoves.Add(kingSecondOptionToMove);
+                        }
+                    }
+                }
+            }
+
+            return listOfLegalMoves;
         }
     }
 }
